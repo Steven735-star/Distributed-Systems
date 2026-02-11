@@ -4,15 +4,14 @@ import string
 import time
 
 def get_random_string(length=8):
-    # Generate a random lowercase string of fixed length
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for _ in range(length))
 
 # --- CONFIGURATION ---
-# Use "localhost" for local testing.
-# Use the SERVER IP address (e.g., "172.23.208.74") for remote testing.
 serverName = "localhost"
 serverPort = 12000
+
+clientSocket = None
 
 try:
     # Create a TCP socket
@@ -30,20 +29,21 @@ try:
         message = get_random_string()
         print(f"Sending ({i+1}/{num_messages}): {message}")
         
-        # Send message to the server
         clientSocket.send(message.encode())
         
-        # Wait for server response
         modifiedSentence = clientSocket.recv(1024)
         print(f"Received from server: {modifiedSentence.decode()}")
         
-        # Small delay for better visualization of concurrency
         time.sleep(0.5)
 
     print("--- Transmission finished ---")
-    
-    # Close the socket connection
-    clientSocket.close()
 
 except ConnectionRefusedError:
     print("Error: Could not connect to the server. Is it running?")
+
+except Exception as e:
+    print(f"An unexpected error occurred: {e}")
+
+finally:
+    if clientSocket:
+        clientSocket.close()
